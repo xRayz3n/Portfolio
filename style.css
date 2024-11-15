@@ -1,9 +1,37 @@
 head, body {
     margin: 0;
     padding: 0;
-    background-color: black;
+    background-color: beige;
 }
 
 canvas {
     display: block;
+}
+h1 {
+    font-size: 2.5em; 
+    margin-bottom: 0.5em;
+}
+p {
+font-size: 1.2em; 
+line-height: 1.5;
+}
+
+#textContainer {
+    display: none;
+    position: fixed;
+    right: 0;
+    width: 20%;
+    height: 100%;
+    background-color: beige;
+    color: rgba(0,0,0,0.8);
+    padding: 20px;
+    font-size: 1.5em;
+    font-family: "Montserrat", sans-serif;
+    overflow: auto;
+}
+
+#canvas {
+    width: 20%;
+    height: 100%;
+    float: left;
 }

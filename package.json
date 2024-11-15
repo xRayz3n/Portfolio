@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0",
+    "debug": "^4.3.7",
+    "events": "^3.3.0",
+    "threejs-object-controls": "^1.2.8"
+  }
+}
