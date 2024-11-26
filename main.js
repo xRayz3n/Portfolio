@@ -25,9 +25,6 @@ const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 2000);
 const cameraInitialPosition = new THREE.Vector3(0, 4.3, 5.5);
 const cameraInitialRotation = new THREE.Euler(-Math.PI / 6, 0, 0);
 
-camera.layers.enable(0); // Render objects on the default layer
-camera.layers.enable(1); // Render objects affected by the light
-camera.layers.enable(2); // Render objects affected by the light
 
 camera.position.copy(cameraInitialPosition);
 camera.rotation.copy(cameraInitialRotation);
@@ -69,22 +66,23 @@ startButton.addEventListener('click', () => { // when clicking the start button
 });
 
 
-const light = new THREE.DirectionalLight(0xffffff, 0.5); // Bright white light
-light.position.set(2, 7, 2); // Position the light
-light.castShadow = true; // Enable shadow casting for the light
-light.layers.set(2);
-scene.add(light);
+const lightCube = new THREE.DirectionalLight(0xffffff, 6); // Bright white light
+lightCube.position.set(2, 7, 2); // Position the lightCube
+lightCube.castShadow = true; // Enable shadow casting for the lightCube
+scene.add(lightCube);
 
+const ambientLightCube = new THREE.AmbientLight( 0xffffff, 0.4 );
+scene.add(ambientLightCube);
 
 const ambientLight = new THREE.AmbientLight( 0xffffff, 0.05 );
 scene.add(ambientLight);
 
-const point_light = new THREE.PointLight( 0xffffff, 5, 0, 0.5 );
+const point_light = new THREE.PointLight( 0xffffff, 4, 0, 0.5 );
 point_light.position.set( 0, 2.9, 0 );
 scene.add( point_light );  
 
 
-// const helper = new THREE.CameraHelper( light.shadow.camera );
+// const helper = new THREE.CameraHelper( lightCube.shadow.camera );
 // scene.add( helper );
 
 function addGlowTorus(object) {
@@ -122,7 +120,7 @@ function addGlowTorus(object) {
     const glowTorus = new THREE.Mesh(torusGeometry, torusMaterial);
     glowTorus.position.copy(object.position);
     glowTorus.rotation.set(Math.PI/2,0,0);
-    scene.add(glowTorus);
+    scene.children[5].add(glowTorus);
 }
 
 let worldModel; 
@@ -138,7 +136,6 @@ const cubeMaterial = new THREE.MeshStandardMaterial({color: 0xFFD885});
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.rotateY(Math.PI/4);
 cube.position.set(0,2.25,0);
-cube.layers.set(2);
 scene.add(cube);
 
 
@@ -208,35 +205,54 @@ loader.load( './models/WT.glb', function ( world ) {
         element.userData.originalRotation = element.rotation.clone();
         clickableObjects.push(element);
     });
+    
+    scene.children[5].visible = false;
 });
-console.log(scene);
 scene.scale.set(0.1,0.1,0.1);
-scene.translateY(2.6);
+cube.translateY(28);
+cube.scale.set(0,0,0);
+let cubeScaleTween;
+cubeScaleTween = new TWEEN.Tween({ // Scale the cube large
+    x: cube.scale.x,
+    y: cube.scale.y,
+    z: cube.scale.z,})
+    .to({x: 1, y:1, z:1}, 1000) // Move over 2 seconds
+    .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+    .onStart()
+    .onUpdate(function (object) {
+        cube.scale.set(object.x,object.y,object.z);
+    })
+    .onComplete()
+    .start()
 
 let sceneOpeningTween;
-let sceneScaleTween;
-let cubeScaleTween;
+let sceneScaleUpTween;
+let cubeScaleDownTween;
+let lightFadeOutTween;
 function OpenScene() {
 
     sceneOpeningTween = new TWEEN.Tween({
-        x: scene.position.x,
-        y: scene.position.y,
-        z: scene.position.z,
-        rotationX: scene.rotation.x,
-        rotationY: scene.rotation.y,
-        rotationZ: scene.rotation.z,
+        x: cube.position.x,
+        y: cube.position.y,
+        z: cube.position.z,
+        rotationX: cube.rotation.x,
+        rotationY: cube.rotation.y,
+        rotationZ: cube.rotation.z,
         })
-        .to({y: scene.position.y - 2.6, rotationY: scene.rotation.y + Math.PI*8}, 2000) // Move over 2 seconds
+        .to({y: cube.position.y - 28, rotationY: cube.rotation.y + Math.PI*8}, 2000) // Move over 2 seconds
         .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
         .onStart()
         .onUpdate(function (object) {
-            scene.position.set(object.x, object.y, object.z);
-            scene.rotation.set(object.rotationX, object.rotationY, object.rotationZ);
+            cube.position.set(object.x, object.y, object.z);
+            cube.rotation.set(object.rotationX, object.rotationY, object.rotationZ);
         })
         .start()
-        .onComplete(() => {sceneScaleTween.start()})
+        .onComplete(() => {
+            sceneScaleUpTween.start();
+            scene.children[5].visible = true;
+        })
 
-    sceneScaleTween = new TWEEN.Tween({
+    sceneScaleUpTween = new TWEEN.Tween({ // Scale the cube large
         x: scene.scale.x,
         y: scene.scale.y,
         z: scene.scale.z,})
@@ -246,20 +262,35 @@ function OpenScene() {
         .onUpdate(function (object) {
             scene.scale.set(object.x,object.y,object.z);
         })
-        .onComplete(() => {cubeScaleTween.start();})
-    cubeScaleTween = new TWEEN.Tween({
+        .onComplete(() => {
+            cubeScaleDownTween.start();
+        })
+    cubeScaleDownTween = new TWEEN.Tween({ // Make the cube disappear
         x: cube.scale.x,
         y: cube.scale.y,
         z: cube.scale.z,})
-        .to({x: 0 ,y: 0, z: 0}, 1000) // Move over 2 seconds
+        .to({x: 0 ,y: 0, z: 0}, 2000) // Move over 2 seconds
         .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
-        .onStart()
+        .onStart(() => setTimeout(() => lightFadeOutTween.start(), 500))
         .onUpdate(function (object) {
             cube.scale.set(object.x,object.y,object.z);
         })
         .onComplete(() => {
             setTimeout(() => {document.getElementById("leftText").classList.add('show'); }, 200);
         })
+    lightFadeOutTween = new TWEEN.Tween({
+        lightIntensity1: lightCube.intensity,
+        lightIntensity2: ambientLightCube.intensity,
+    })
+    .to({lightIntensity1: 0, lightIntensity2: 0}, 2000)
+    .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+    .onUpdate(function (object) {
+        lightCube.intensity = object.lightIntensity1;
+        ambientLightCube.intensity = object.lightIntensity2;
+    })
+    .easing(TWEEN.Easing.Cubic.InOut)
+    .onComplete()
+
 }
 
     function showTextContainer(containerId) {
@@ -493,7 +524,9 @@ const animate = () => {
     if (interactWithObjectTween != null) interactWithObjectTween.update();
     if (cameraToObjectTween != null) cameraToObjectTween.update();
     if (sceneOpeningTween != null) sceneOpeningTween.update();
-    if (sceneScaleTween != null) sceneScaleTween.update();
+    if (sceneScaleUpTween != null) sceneScaleUpTween.update();
+    if (cubeScaleDownTween != null) cubeScaleDownTween.update();
+    if (lightFadeOutTween != null) lightFadeOutTween.update();
     if (cubeScaleTween != null) cubeScaleTween.update();
     
 };
