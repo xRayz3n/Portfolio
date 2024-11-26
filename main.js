@@ -55,15 +55,32 @@ document.addEventListener('keypress', (event) => { // Reads out camera position
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 
+startButton.addEventListener('click', () => { // when clicking the start button
+    // Hide landing page and show canvas
+    landingPage.style.opacity = 0;
+    setTimeout(() => {
+        landingPage.style.display = 'none';
+        canvas.style.display = 'block'; // Display the canvas
+    }, 500); // Match transition duration
+    OpenScene();
+});
 
-const light = new THREE.AmbientLight( 0xffffff, 0.05 );
-// scene.add( light );
+
+const light = new THREE.DirectionalLight(0xffffff, 1); // Bright white light
+light.position.set(2, 7, 2); // Position the light
+light.castShadow = true; // Enable shadow casting for the light
+scene.add(light);
+
+
+const ambientLight = new THREE.AmbientLight( 0xffffff, 0.05 );
+scene.add(ambientLight);
 
 const point_light = new THREE.PointLight( 0xffffff, 5, 0, 0.5 );
 point_light.position.set( 0, 2.9, 0 );
 scene.add( point_light );  
 
-// const helper = new THREE.CameraHelper( point_light.shadow.camera );
+
+// const helper = new THREE.CameraHelper( light.shadow.camera );
 // scene.add( helper );
 
 function addGlowTorus(object) {
@@ -111,6 +128,15 @@ let arcPulse;
 let exoTouch;
 let mozaik;
 let gamongus;
+
+const cubeGeometry = new THREE.BoxGeometry(6,6,6);
+const cubeMaterial = new THREE.MeshStandardMaterial({color: 0xFFD885});
+const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.rotateY(Math.PI/4);
+cube.position.set(0,2.25,0);
+scene.add(cube);
+
+
 loader.load( './models/WT.glb', function ( world ) {
     worldModel = world.scene;
     scene.add(worldModel);
@@ -178,17 +204,55 @@ loader.load( './models/WT.glb', function ( world ) {
         element.userData.originalRotation = element.rotation.clone();
         clickableObjects.push(element);
     });
-    });
-
-startButton.addEventListener('click', () => { // when clicking the start button
-    // Hide landing page and show canvas
-    landingPage.style.opacity = 0;
-    setTimeout(() => {
-        landingPage.style.display = 'none';
-        canvas.style.display = 'block'; // Display the canvas
-    }, 500); // Match transition duration
 });
+scene.scale.set(0.1,0.1,0.1);
+scene.translateY(2.6);
 
+let sceneOpeningTween;
+let sceneScaleTween;
+let cubeScaleTween;
+function OpenScene() {
+
+    sceneOpeningTween = new TWEEN.Tween({
+        x: scene.position.x,
+        y: scene.position.y,
+        z: scene.position.z,
+        rotationX: scene.rotation.x,
+        rotationY: scene.rotation.y,
+        rotationZ: scene.rotation.z,
+        })
+        .to({y: scene.position.y - 2.6, rotationY: scene.rotation.y + Math.PI*8}, 2000) // Move over 2 seconds
+        .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+        .onStart()
+        .onUpdate(function (object) {
+            scene.position.set(object.x, object.y, object.z);
+            scene.rotation.set(object.rotationX, object.rotationY, object.rotationZ);
+        })
+        .start()
+        .onComplete(() => {sceneScaleTween.start()})
+
+    sceneScaleTween = new TWEEN.Tween({
+        x: scene.scale.x,
+        y: scene.scale.y,
+        z: scene.scale.z,})
+        .to({x: 1, y:1, z:1}, 2000) // Move over 2 seconds
+        .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+        .onStart()
+        .onUpdate(function (object) {
+            scene.scale.set(object.x,object.y,object.z);
+        })
+        .onComplete(() => {cubeScaleTween.start();})
+    cubeScaleTween = new TWEEN.Tween({
+        x: cube.scale.x,
+        y: cube.scale.y,
+        z: cube.scale.z,})
+        .to({x: 0 ,y: 0, z: 0}, 1000) // Move over 2 seconds
+        .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+        .onStart()
+        .onUpdate(function (object) {
+            cube.scale.set(object.x,object.y,object.z);
+        })
+}
 
     function showTextContainer(containerId) {
         // Hide all text containers first
@@ -369,7 +433,7 @@ function ReturnObjectToPosition(item)
     let interactWithObjectTween;
     let cameraToObjectTween;
     let interactedObjects = [];
-function InteractWithObject(item) {
+function InteractWithObject(item) { // Moves the camera to the selected object and lifts it up by 0.2
     console.log(item.name);
     if (item.name.includes("Coaster")) splitScreenWithText("Coasters"); else splitScreenWithText(item.name);
     interactedObjects = [];
@@ -420,7 +484,7 @@ composer.addPass(outputPass);
 
 const animate = () => {
     requestAnimationFrame(animate);
-    composer.render();
+
     renderer.render(scene, camera);
     if (camera.position.equals(cameraInitialPosition)) // Moves the scene only in initial position
     scene.rotation.y = mouse.x * 0.02; // Adjust multiplier for desired effect
@@ -431,7 +495,9 @@ const animate = () => {
     if (objectToPositionTween != null) objectToPositionTween.update();
     if (interactWithObjectTween != null) interactWithObjectTween.update();
     if (cameraToObjectTween != null) cameraToObjectTween.update();
-
+    if (sceneOpeningTween != null) sceneOpeningTween.update();
+    if (sceneScaleTween != null) sceneScaleTween.update();
+    if (cubeScaleTween != null) cubeScaleTween.update();
     
 };
 animate();
