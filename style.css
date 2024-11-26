@@ -4,6 +4,124 @@ head, body {
     background-color: beige;
 }
 
+/* Preloader styling (unchanged) */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: beige; /* Match the scene's background */
+    z-index: 1000; /* Ensure it covers everything */
+}
+
+/* Landing page styling */
+#landingPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: beige;
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center;
+    align-items: center;
+    z-index: 999; /* Below the preloader but above the canvas */
+    opacity: 1;
+    transition: opacity 3s ease-out;
+    text-align: center;
+    
+}
+
+#welcomeTitle {
+    font-size: 2.5em;
+    font-family: "Montserrat", sans-serif;
+    color: #1E1E1E;
+    margin-bottom: 40px; /* Add spacing between the title and the button */
+    text-align: center;
+    overflow: hidden; /* Hide text overflow during animation */
+    white-space: nowrap;
+    width: 0; /* Start with no visible text */
+
+}
+
+#welcomeTitle.animate {
+    animation: typing 5s steps(80, end), blink 0.6s step-end 0;
+    width: 100%;
+
+}
+
+#madeBy {
+    font-size: 2em;
+    font-family: "Montserrat", sans-serif;
+    color: #1E1E1E;
+    margin-bottom: 40px; /* Add spacing between the title and the button */
+    text-align: center;
+    overflow: hidden; /* Hide text overflow during animation */
+    white-space: nowrap;
+    width: 0; /* Start with no visible text */
+
+}
+
+#madeBy.animate {
+    animation: typing 5s steps(80, end), blink 0.6s step-end 0;
+    width: 100%;
+
+}
+/* Typing effect */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+/* Blinking cursor effect */
+@keyframes blink {
+    from {
+        border-right-color: #1E1E1E;
+    }
+    to {
+        border-right-color: transparent;
+    }
+}
+
+/* Start button styling */
+#startButton {
+    width: 150px;
+    height: 150px;
+    background-color: #FFD885;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    font-weight: 600;
+    align-items: center;
+    font-size: 2em;
+    font-family: "Montserrat", sans-serif;
+    color: 1E1E1E;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    opacity: 0; /* Start hidden */
+    transform: scale(0.9);
+    pointer-events: none; /* Prevent interaction until visible */
+}
+#startButton.show {
+    opacity: 1; /* Fully visible */
+    pointer-events: auto; /* Enable interaction */
+    transform: scale(1); /* Restore normal size */
+    transition: opacity 1s ease, transform 0.5s ease;
+}
+
+#startButton:hover {
+    transform: scale(1.1); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+}
+
 canvas {
     display: block;
 }
@@ -16,19 +134,58 @@ font-size: 1.2em;
 line-height: 1.5;
 }
 
-#textContainer {
-    display: none;
+#leftText {
     position: fixed;
-    right: 0;
-    width: 20%;
-    height: 100%;
+    overflow-y: hidden;
+    left: 1em; /* Start outside the viewport */
+    top: 50%;
+    width: 10em;
+    height: 4em;
+    color: #1E1E1E;
+    padding: 1em;
+    border-radius: 4em;
     background-color: beige;
-    color: rgba(0,0,0,0.8);
-    padding: 20px;
     font-size: 1.5em;
     font-family: "Montserrat", sans-serif;
     overflow: auto;
+    transition: right 2s ease, opacity 1s ease, border-radius 1.5s ease-in;
+    pointer-events: none; /* Prevent interaction when hidden */
 }
+#leftText.hidden {
+    opacity: 0;
+}
+
+.textContainer {
+    position: fixed;
+    right: -40%; /* Start outside the viewport */
+    top: 0;
+    width: 30%;
+    height: 100%;
+    background-color: #FFF5B3;
+    color: #1E1E1E;
+    padding: 2em;
+    font-size: 1.5em;
+    font-family: "Montserrat", sans-serif;
+    opacity: 0; /* Make visible */
+    overflow: auto;
+    transition: right 2s ease, opacity 1s ease, border-radius 1.5s ease-in;
+    pointer-events: none; /* Prevent interaction when hidden */
+    border-radius: 150px 0 0 150px; /* Add rounded corners on the left side */
+}
+
+.textContainer.active {
+    right: 0; /* Slide into view */
+    opacity: 1; /* Make visible */
+    pointer-events: auto; /* Enable interaction */
+    border-radius: 40px 0 0 40px; /* Add rounded corners on the left side */
+}
+.textContainer.inactive {
+    right: -40%; /* Slide out */
+    opacity: 1; /* Fade out */
+    pointer-events: none; /* Prevent interaction */
+    border-radius: 150px 0 0 150px; /* Add rounded corners on the left side */
+}
+
 
 #canvas {
     width: 20%;

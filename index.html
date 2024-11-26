@@ -17,14 +17,66 @@
 
 </head>
 <body>
+    <div id="preloader">
+        <p>Loading...</p>
+    </div>
+
+    <div id="landingPage">
+        <div id="welcomeTitle">Welcome to my THREE.js portfolio! </div>
+        <div id="madeBy">By Sébastien LAM</div>
+        <div id="startButton">Start</div>
+    </div>
+
     <canvas id="canvas"></canvas>
-    <div id="textContainer">
+
+    <div id="leftText">Click on highlighted objects to learn more about my projects</div>
+
+    <!-- Multiple text containers with different content -->
+    <div class="textContainer" id="Keyboards">
         <h1>Naya Create</h1>
         <p>
-            You are now interacting with the Naya Keyboard. Explore the functionalities and feel free to rotate, scale, and move it.
-            Click anywhere outside the keyboard to return to the original view.
+            The Naya Create is a modular, ergonomic split keyboard designed for comfort and customization. It features swappable modules and user-configurable layouts, made for productivity and accessibility in professional and creative settings.
+            <br>
+            I was involved into making the <strong>mechanical design of the keyboard</strong> along with its <strong>case</strong> and <strong>packaging</strong>.
         </p>
     </div>
+
+    <div class="textContainer" id="Coasters">
+        <h1>Mozaik</h1>
+        <p>
+            Mozaïk are upcycled leather coasters produced with a unique interlocking design. It features an infinitely modular shape, allowing people to use it as a coaster or assemble it to make a placemat.
+            <br>
+            This product was launched on <a href="https://www.kickstarter.com/projects/1651422321/quickstarter-mozaic-modular-and-elegant-leather-coasters/description" target="_blank">Kickstarter</a> and labelled as "<strong>Project We Love</strong>" which was fully funded at <strong>179%</strong> of its goal.
+        </p>
+    </div>
+    <div class="textContainer" id="Arc">
+        <h1>Arc Pulse</h1>
+        <p>
+            The Arc Pulse is a minimalist, premium phone case offering sleek protection by safeguarding key impact points while maintaining the device's original design and feel, functionality, and durability for discerning users.
+            <br>
+            I was involved as a <strong>CAD engineer</strong> into the modeling of their <strong>iPhone 16</strong> and <strong>Pixel 9</strong> phone case lineup along with their sustainable packaging.
+        </p>
+    </div>
+    <div class="textContainer" id="Gamongus">
+        <h1>Gamongus</h1>
+        <p>
+            The Gamongus project is a set of two Game boys capable of playing a Pong game in network conceived and built entirely in 4 days. It is made of two sliding handles attached on the main body that contains 8 buttons, an ESP32 and an OLED screen.
+            <br>
+            I was responsible for coordinating and managing this project from the electronic integration to the 3D modeling of it.
+        </p>
+    </div>
+    <div class="textContainer" id="Exotouch">
+        <h1>Exotouch 2</h1>
+        <p>
+            ExoTouch 2 is a <strong>DIY haptic glove</strong> that aims to be <strong>lightweight</strong>, <strong>ergonomic</strong> and <strong>affordable</strong>. It is meant to be used in virtual reality and replaces the well-established controller interface.
+            <br>
+            It uses hall-effect sensors that allows a precise finger tracking along with servo motors to provide a haptic feedback to the user. Its main strength lies in its ability to fit small to large hands with varying finger length and diameter thanks to the fully adjustable ring design along with a very high maximum to minimum force feedback ratio and lightweight.
+            <br>
+            This project comes a design upgrade to the existing DIY haptic glove <a href="https://github.com/LucidVR/lucidgloves" target="_blank">Lucid Glove</a> by Lucas VRTech.
+        </p>
+    </div>
+
+</body>
     <script type="module" src="./main.js"></script>
 
 </body>

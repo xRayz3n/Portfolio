@@ -4,6 +4,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import * as TWEEN from 'https://unpkg.com/@tweenjs/tween.js@25.0.0/dist/tween.esm.js';
 
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
 
 
 const loader = new GLTFLoader();
@@ -13,18 +18,8 @@ const scene = new THREE.Scene();
 // Replace the perspective camera with an orthographic camera
 const aspect = window.innerWidth / window.innerHeight;
 
-// const orthoSize = 5; // Adjust this value as needed to control zoom level
-// const camera = new THREE.OrthographicCamera(
-//   -orthoSize * aspect, // left
-//   orthoSize * aspect,   // right
-//   orthoSize,            // top
-//   -orthoSize,           // bottom
-//   0.1,                  // near
-//   1000                  // far
-// );
 
-
-const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 2000);
 
 // Set camera position
 const cameraInitialPosition = new THREE.Vector3(0, 4.3, 5.5);
@@ -41,6 +36,9 @@ const renderer = new THREE.WebGLRenderer( {
     antialias: true,
     alpha: true,
 });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
 
 
     // const controls = new OrbitControls(camera, canvas);
@@ -59,11 +57,52 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 
 const light = new THREE.AmbientLight( 0xffffff, 0.05 );
-scene.add( light );
+// scene.add( light );
 
 const point_light = new THREE.PointLight( 0xffffff, 5, 0, 0.5 );
 point_light.position.set( 0, 2.9, 0 );
 scene.add( point_light );  
+
+// const helper = new THREE.CameraHelper( point_light.shadow.camera );
+// scene.add( helper );
+
+function addGlowTorus(object) {
+    const torusGeometry = new THREE.TorusGeometry(0.03, 0.007, 16, 48);
+    const torusMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            glowColor: { type: "c", value: new THREE.Color(0xffffff) },
+            viewVector: { type: "v3", value: camera.position }
+        },
+        vertexShader: `
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
+                vViewPosition = -viewPosition.xyz;
+                gl_Position = projectionMatrix * viewPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            uniform vec3 glowColor;
+
+            void main() {
+                float intensity = pow(0.6 - dot(vNormal, vViewPosition), 2.0);
+                gl_FragColor = vec4(glowColor * intensity, 1.0);
+            }
+        `,
+        blending: THREE.AdditiveBlending,
+        transparent: true
+    });
+
+    const glowTorus = new THREE.Mesh(torusGeometry, torusMaterial);
+    glowTorus.position.copy(object.position);
+    glowTorus.rotation.set(Math.PI/2,0,0);
+    scene.add(glowTorus);
+}
 
 let worldModel; 
 const clickableObjects = []; // Store all child objects here for raycasting
@@ -71,9 +110,25 @@ let nayaKeyboards;
 let arcPulse;
 let exoTouch;
 let mozaik;
+let gamongus;
 loader.load( './models/WT.glb', function ( world ) {
     worldModel = world.scene;
     scene.add(worldModel);
+
+    preloader.style.display = 'none'; // Hide preloader
+    landingPage.style.opacity = 1; // Show landing page
+    setTimeout(() => {
+        document.getElementById('welcomeTitle').classList.add('animate');
+        const typingDuration = 3500; // Match the typing animation duration (3s)
+        
+        setTimeout(() => {
+            document.getElementById('startButton').classList.add('show');
+        }, typingDuration); 
+
+        setTimeout(() => {document.getElementById('madeBy').classList.add('animate');}, 2000);
+
+    }, 1000); // Add a 500ms delay after preloader finishes
+
     console.log(worldModel);
     nayaKeyboards = world.scene.children.find((child) => { return child.name === "Keyboards" });
     nayaKeyboards.cameraPosition = new THREE.Vector3(1.1357178368030407, 1.818500052382477, 0.22341896339374923);
@@ -100,6 +155,22 @@ loader.load( './models/WT.glb', function ( world ) {
     mozaik.userData.originalPosition = mozaik.position.clone();
     mozaik.userData.originalRotation = mozaik.rotation.clone();
 
+    gamongus = world.scene.children.find((child) => { return child.name === "Gamongus"});
+    gamongus.cameraPosition = new THREE.Vector3(0.17460133489092128, 1.9064901488532007, -1.0722653170302845);
+    gamongus.cameraRotation = new THREE.Euler(-0.3479231710494397, -0.3305723127522177, -0.11717990733562156);
+    gamongus.userData.originalPosition = gamongus.position.clone();
+    gamongus.userData.originalRotation = gamongus.rotation.clone();
+
+    clickableObjects.push(gamongus);
+    clickableObjects.push(mozaik);
+    clickableObjects.push(exoTouch);
+    clickableObjects.push(nayaKeyboards);
+    clickableObjects.push(arcPulse);
+
+    clickableObjects.forEach((object) => {
+        addGlowTorus(object);
+    });
+
     mozaik.children.forEach(element => {
         element.cameraPosition = new THREE.Vector3(-0.9570724304040399, 1.6353095804542224, 2.2482848550641825);
         element.cameraRotation = new THREE.Euler(-0.7879492606979157, -0.33295960801367536, -0.317406357724351);
@@ -107,38 +178,57 @@ loader.load( './models/WT.glb', function ( world ) {
         element.userData.originalRotation = element.rotation.clone();
         clickableObjects.push(element);
     });
-    clickableObjects.push(mozaik);
-    clickableObjects.push(exoTouch);
-    clickableObjects.push(nayaKeyboards);
-    clickableObjects.push(arcPulse);
     });
 
-    function splitScreenWithText() {
-        // Crop the canvas to half-width and shift the center, then show the text container
-        canvas.style.transition = "clip-path 1s ease, transform 1s ease";
+startButton.addEventListener('click', () => { // when clicking the start button
+    // Hide landing page and show canvas
+    landingPage.style.opacity = 0;
+    setTimeout(() => {
+        landingPage.style.display = 'none';
+        canvas.style.display = 'block'; // Display the canvas
+    }, 500); // Match transition duration
+});
+
+
+    function showTextContainer(containerId) {
+        // Hide all text containers first
+        document.querySelectorAll('.textContainer').forEach(container => {
+            container.classList.remove('active');
+            container.classList.add('inactive');
+        });
+    
+        // Show the specific container
+        const textContainer = document.getElementById(containerId);
+        if (textContainer) {
+            textContainer.classList.remove('inactive');
+            textContainer.classList.add('active');
+        }
+    }
+    
+    function splitScreenWithText(containerId) {
+        // Crop the canvas and slide in the specific text container
+        document.getElementById("leftText").classList.add('hidden');
+        showTextContainer(containerId);
+        canvas.style.transition = "clip-path 2s ease, transform 2s ease";
         canvas.style.clipPath = "inset(0 0% 0 0)";
-        canvas.style.transform = "translateX(-10%)"; // Shift canvas left to center the cropped area
-        textContainer.style.transition = "opacity 1s ease";
-        textContainer.style.opacity = "0";
-        textContainer.style.display = "block";
-        setTimeout(() => {
-            textContainer.style.opacity = "0.8";
-        }, 10);
+        canvas.style.transform = "translateX(-15%)";
+    
     }
     
     function resetFullScreen() {
-        // Reset the canvas to full screen and hide the text container
-        canvas.style.transition = "clip-path 1s ease, transform 1s ease";
+        // Reset the canvas and slide out all text containers
+        canvas.style.transition = "clip-path 1.5s ease, transform 1.5s ease";
         canvas.style.clipPath = "inset(0 0 0 0)";
         canvas.style.transform = "translateX(0)";
-        textContainer.style.display = "none";
-        textContainer.style.transition = "opacity 1s ease";
-        textContainer.style.opacity = "0";
-        setTimeout(() => {
-            textContainer.style.opacity = "0.8";
-        }, 10);
+        setTimeout(() => {document.getElementById("leftText").classList.remove('hidden'); }, 1000);
+    
+        document.querySelectorAll('.textContainer').forEach(container => {
+            container.classList.remove('active');
+            container.classList.add('inactive');
+        });
     }
     
+
 
 
 const raycaster = new THREE.Raycaster();
@@ -201,9 +291,10 @@ window.addEventListener('click', () => {
             if (clickedObject.name.includes("AP")) InteractWithObject(arcPulse);            
             if (clickedObject.name.includes("EXO")) InteractWithObject(exoTouch);
             if (clickedObject.name.includes("Coaster")) InteractWithObject(clickedObject);
+            if (clickedObject.name.includes("Gamongus")) InteractWithObject(gamongus);
         }
     }
-    if (mouseMovement != "initial") {
+    if (mouseMovement != "initial") { // if the click doesn't intersect with the object
         ReturnCameraToInitial();
         switch (mouseMovement) {
             case 'Keyboards':
@@ -217,6 +308,9 @@ window.addEventListener('click', () => {
                 break;
             case 'Coasters':
                 ReturnObjectToPosition(mozaik);
+                break;
+            case 'Gamongus':
+                ReturnObjectToPosition(gamongus);
                 break;
             default:
                 ReturnObjectToPosition(interactedObjects[interactedObjects.length-1])
@@ -276,7 +370,8 @@ function ReturnObjectToPosition(item)
     let cameraToObjectTween;
     let interactedObjects = [];
 function InteractWithObject(item) {
-    splitScreenWithText();
+    console.log(item.name);
+    if (item.name.includes("Coaster")) splitScreenWithText("Coasters"); else splitScreenWithText(item.name);
     interactedObjects = [];
     cameraToObjectTween = new TWEEN.Tween({
         x: camera.position.x,
@@ -302,38 +397,34 @@ function InteractWithObject(item) {
             interactedObjects.push(item);})
         .start()
 }
-
-
-
+window.addEventListener('contextmenu', (event) => { // prevents the menu from opening with right click
+    event.preventDefault();
+});
 function RotateObject(Object) {
     Object.rotation.set(mouse.x * 1.5,Object.rotation.y, -mouse.y * 1.5);
     
 }
 
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.5, // strength
+    1, // radius
+    0.1 // threshold
+);
+const outputPass = new OutputPass();
+composer.addPass(renderPass);
+composer.addPass(bloomPass);
+composer.addPass(outputPass);
+
 
 const animate = () => {
     requestAnimationFrame(animate);
+    composer.render();
     renderer.render(scene, camera);
     if (camera.position.equals(cameraInitialPosition)) // Moves the scene only in initial position
     scene.rotation.y = mouse.x * 0.02; // Adjust multiplier for desired effect
-    console.log(mouseMovement)
-    if (mouseMovement == "Keyboards")
-    {
-        RotateObject(nayaKeyboards);
-    }
-    if (mouseMovement == "Arc")
-    {
-        RotateObject(arcPulse);
-    }
-    if (mouseMovement == "Exotouch")
-    {
-        RotateObject(exoTouch);
-    }
-    if (mouseMovement == "Coasters")
-    {
-        RotateObject(mozaik);
-    }
-    else if (interactedObjects.length > 0 && interactedObjects[interactedObjects.length-1] != "initial")
+    if (interactedObjects.length > 0 && interactedObjects[interactedObjects.length-1] != "initial")
     RotateObject(interactedObjects[interactedObjects.length-1]);
 
     if (cameraToInitialTween != null) cameraToInitialTween.update();
