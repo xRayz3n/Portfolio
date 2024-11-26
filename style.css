@@ -181,11 +181,12 @@ line-height: 1.5;
     font-size: 1.5em;
     font-family: "Montserrat", sans-serif;
     overflow: auto;
+    opacity: 0;
     transition: right 2s ease, opacity 1s ease, border-radius 1.5s ease-in;
     pointer-events: none; /* Prevent interaction when hidden */
 }
-#leftText.hidden {
-    opacity: 0;
+#leftText.show {
+    opacity: 1;
 }
 
 .textContainer {

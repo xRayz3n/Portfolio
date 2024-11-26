@@ -25,8 +25,11 @@ const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 2000);
 const cameraInitialPosition = new THREE.Vector3(0, 4.3, 5.5);
 const cameraInitialRotation = new THREE.Euler(-Math.PI / 6, 0, 0);
 
+camera.layers.enable(0); // Render objects on the default layer
+camera.layers.enable(1); // Render objects affected by the light
+camera.layers.enable(2); // Render objects affected by the light
+
 camera.position.copy(cameraInitialPosition);
-// // Set a point where the camera looks at
 camera.rotation.copy(cameraInitialRotation);
 
 const canvas = document.getElementById("canvas");
@@ -66,9 +69,10 @@ startButton.addEventListener('click', () => { // when clicking the start button
 });
 
 
-const light = new THREE.DirectionalLight(0xffffff, 1); // Bright white light
+const light = new THREE.DirectionalLight(0xffffff, 0.5); // Bright white light
 light.position.set(2, 7, 2); // Position the light
 light.castShadow = true; // Enable shadow casting for the light
+light.layers.set(2);
 scene.add(light);
 
 
@@ -134,6 +138,7 @@ const cubeMaterial = new THREE.MeshStandardMaterial({color: 0xFFD885});
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.rotateY(Math.PI/4);
 cube.position.set(0,2.25,0);
+cube.layers.set(2);
 scene.add(cube);
 
 
@@ -155,7 +160,6 @@ loader.load( './models/WT.glb', function ( world ) {
 
     }, 1000); // Add a 500ms delay after preloader finishes
 
-    console.log(worldModel);
     nayaKeyboards = world.scene.children.find((child) => { return child.name === "Keyboards" });
     nayaKeyboards.cameraPosition = new THREE.Vector3(1.1357178368030407, 1.818500052382477, 0.22341896339374923);
     nayaKeyboards.cameraRotation = new THREE.Euler(-0.8183318751767803, -0.5803659001171946, -0.5298317237830532);
@@ -205,6 +209,7 @@ loader.load( './models/WT.glb', function ( world ) {
         clickableObjects.push(element);
     });
 });
+console.log(scene);
 scene.scale.set(0.1,0.1,0.1);
 scene.translateY(2.6);
 
@@ -252,6 +257,9 @@ function OpenScene() {
         .onUpdate(function (object) {
             cube.scale.set(object.x,object.y,object.z);
         })
+        .onComplete(() => {
+            setTimeout(() => {document.getElementById("leftText").classList.add('show'); }, 200);
+        })
 }
 
     function showTextContainer(containerId) {
@@ -271,7 +279,7 @@ function OpenScene() {
     
     function splitScreenWithText(containerId) {
         // Crop the canvas and slide in the specific text container
-        document.getElementById("leftText").classList.add('hidden');
+        document.getElementById("leftText").classList.remove('show');
         showTextContainer(containerId);
         canvas.style.transition = "clip-path 2s ease, transform 2s ease";
         canvas.style.clipPath = "inset(0 0% 0 0)";
@@ -284,7 +292,7 @@ function OpenScene() {
         canvas.style.transition = "clip-path 1.5s ease, transform 1.5s ease";
         canvas.style.clipPath = "inset(0 0 0 0)";
         canvas.style.transform = "translateX(0)";
-        setTimeout(() => {document.getElementById("leftText").classList.remove('hidden'); }, 1000);
+        setTimeout(() => {document.getElementById("leftText").classList.add('show'); }, 1000);
     
         document.querySelectorAll('.textContainer').forEach(container => {
             container.classList.remove('active');
@@ -469,17 +477,6 @@ function RotateObject(Object) {
     
 }
 
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.5, // strength
-    1, // radius
-    0.1 // threshold
-);
-const outputPass = new OutputPass();
-composer.addPass(renderPass);
-composer.addPass(bloomPass);
-composer.addPass(outputPass);
 
 
 const animate = () => {
