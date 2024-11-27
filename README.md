@@ -3,7 +3,7 @@
 
 Welcome to my portfolio, built using **THREE.js** and showcasing my professional projects and achievements. This portfolio uses an immersive 3D environment with clickable objects to explore various projects. Each project has a unique description, highlighting my involvement and contributions.
 
-This project's scene draws inspiration from **oscarqjh's** portfolio. The Github page of this project is available [here](https://github.com/oscarqjh/threejs-portfolio/tree/main). 
+This project's scene draws inspiration from **oscarqjh's** portfolio. The Github page of his project is available [here](https://github.com/oscarqjh/threejs-portfolio/tree/main). 
 
 ## Features
 
