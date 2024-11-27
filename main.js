@@ -410,7 +410,7 @@ window.addEventListener('click', () => {
             if (clickedObject.name.includes("Linkedin")) {window.open("https://www.linkedin.com/in/sebastien-lam/");}
             if (clickedObject.name.includes("Github")) {window.open("https://github.com/xRayz3n");}
             if (clickedObject.name.includes("CV")) {
-                const filePath = "CV/CV%20Sebastien%20LAM.pdf"; // Relative path to the file
+                const filePath = "files/CV%20Sebastien%20LAM.pdf"; // Relative path to the file
                 window.open(filePath, "_blank");
             }
         }
