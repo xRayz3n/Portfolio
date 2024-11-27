@@ -109,7 +109,7 @@ function addGlowTorus(object) {
             uniform vec3 glowColor;
 
             void main() {
-                float intensity = pow(0.6 - dot(vNormal, vViewPosition), 2.0);
+                float intensity = pow(0.6 - dot(vNormal, vViewPosition), 4.0);
                 gl_FragColor = vec4(glowColor * intensity, 1.0);
             }
         `,
@@ -130,6 +130,9 @@ let arcPulse;
 let exoTouch;
 let mozaik;
 let gamongus;
+let linkedin;
+let github;
+let cv;
 
 const cubeGeometry = new THREE.BoxGeometry(6,6,6);
 const cubeMaterial = new THREE.MeshStandardMaterial({color: 0xFFD885});
@@ -187,6 +190,14 @@ loader.load( './models/WT.glb', function ( world ) {
     gamongus.cameraRotation = new THREE.Euler(-0.3479231710494397, -0.3305723127522177, -0.11717990733562156);
     gamongus.userData.originalPosition = gamongus.position.clone();
     gamongus.userData.originalRotation = gamongus.rotation.clone();
+    
+    
+    linkedin = world.scene.children.find((child) => { return child.name === "Linkedin"});
+    clickableObjects.push(linkedin);
+    github = world.scene.children.find((child) => { return child.name === "Github"});
+    clickableObjects.push(github);
+    cv = world.scene.children.find((child) => { return child.name === "CV"});
+    clickableObjects.push(cv);
 
     clickableObjects.push(gamongus);
     clickableObjects.push(mozaik);
@@ -207,6 +218,7 @@ loader.load( './models/WT.glb', function ( world ) {
     });
     
     scene.children[5].visible = false;
+    
 });
 scene.scale.set(0.1,0.1,0.1);
 cube.translateY(28);
@@ -216,8 +228,8 @@ cubeScaleTween = new TWEEN.Tween({ // Scale the cube large
     x: cube.scale.x,
     y: cube.scale.y,
     z: cube.scale.z,})
-    .to({x: 1, y:1, z:1}, 1000) // Move over 2 seconds
-    .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+    .to({x: 1, y:1, z:1}, 2000) // Move over 2 seconds
+    .easing(TWEEN.Easing.Elastic.Out) // Smooth easing
     .onStart()
     .onUpdate(function (object) {
         cube.scale.set(object.x,object.y,object.z);
@@ -269,8 +281,8 @@ function OpenScene() {
         x: cube.scale.x,
         y: cube.scale.y,
         z: cube.scale.z,})
-        .to({x: 0 ,y: 0, z: 0}, 2000) // Move over 2 seconds
-        .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
+        .to({x: 0 ,y: 0, z: 0}, 1200) // Move over 2 seconds
+        .easing(TWEEN.Easing.Cubic.In) // Smooth easing
         .onStart(() => setTimeout(() => lightFadeOutTween.start(), 500))
         .onUpdate(function (object) {
             cube.scale.set(object.x,object.y,object.z);
@@ -282,7 +294,7 @@ function OpenScene() {
         lightIntensity1: lightCube.intensity,
         lightIntensity2: ambientLightCube.intensity,
     })
-    .to({lightIntensity1: 0, lightIntensity2: 0}, 2000)
+    .to({lightIntensity1: 0, lightIntensity2: 0}, 1200)
     .easing(TWEEN.Easing.Cubic.InOut) // Smooth easing
     .onUpdate(function (object) {
         lightCube.intensity = object.lightIntensity1;
@@ -339,7 +351,7 @@ const mouse = new THREE.Vector2();
 let hoveredObject = null; 
 const hoverColor = 0xEEEEEE; 
 
-window.addEventListener('mousemove', (event) => {
+window.addEventListener('mousemove', (event) => { // To detect when hovering
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
@@ -395,6 +407,12 @@ window.addEventListener('click', () => {
             if (clickedObject.name.includes("EXO")) InteractWithObject(exoTouch);
             if (clickedObject.name.includes("Coaster")) InteractWithObject(clickedObject);
             if (clickedObject.name.includes("Gamongus")) InteractWithObject(gamongus);
+            if (clickedObject.name.includes("Linkedin")) {window.open("https://www.linkedin.com/in/sebastien-lam/");}
+            if (clickedObject.name.includes("Github")) {window.open("https://github.com/xRayz3n");}
+            if (clickedObject.name.includes("CV")) {
+                const filePath = "CV/CV%20Sebastien%20LAM.pdf"; // Relative path to the file
+                window.open(filePath, "_blank");
+            }
         }
     }
     if (mouseMovement != "initial") { // if the click doesn't intersect with the object
