@@ -11,7 +11,15 @@ This project's scene draws inspiration from **oscarqjh's** portfolio. The Github
 - **Interactive Objects**: Clickable 3D objects linked to specific projects, with transitions and detailed descriptions.
 - **Responsive Design**: Adjusts seamlessly to different screen sizes.
 - **Smooth Animations**: Enhanced user experience using TWEEN.js for animations.
-- **Direct Links**: Access LinkedIn, GitHub, and my CV directly through the interface.
+- **Direct Links**: Access LinkedIn, GitHub, and my CV directly through the interface.git co
+
+## How to Use
+
+1. **Explore**: Hover over objects in the 3D scene to highlight them.
+2. **Interact**: Click objects to rotate them and view project details.
+3. **Navigation**: Use the LinkedIn, GitHub, and CV links to explore external resources.
+4. **Reset View**: Click elsewhere to return to the main 3D scene.
+
 
 ## Projects Highlighted
 
@@ -43,13 +51,6 @@ This project's scene draws inspiration from **oscarqjh's** portfolio. The Github
 - **GLTFLoader**: To load 3D models.
 - **HTML/CSS**: For layout and styling.
 - **JavaScript**: Logic and interactivity.
-
-## How to Use
-
-1. **Explore**: Hover over objects in the 3D scene to highlight them.
-2. **Interact**: Click objects to rotate them and view project details.
-3. **Navigation**: Use the LinkedIn, GitHub, and CV links to explore external resources.
-4. **Reset View**: Click elsewhere to return to the main 3D scene.
 
 ## Local Installation
 
