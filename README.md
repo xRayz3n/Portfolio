@@ -56,4 +56,4 @@ This project's scene draws inspiration from **oscarqjh's** portfolio. The Github
 
 1. Clone the repository:
    ```bash
-   git clone https://github.comx/Rayz3n/Portfolio
+   git clone https://github.com/xRayz3n/Portfolio
